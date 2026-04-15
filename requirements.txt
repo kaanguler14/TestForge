@@ -1,0 +1,5 @@
+langgraph
+langchain-ollama
+streamlit
+pytest
+pytest-cov

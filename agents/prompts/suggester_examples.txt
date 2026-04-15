@@ -1,0 +1,173 @@
+--- EXAMPLE 1 ---
+Source Code:
+def divide(a, b):
+    return a / b
+
+Coverage: 80%
+
+Good response:
+1. divide() has no check for b=0. This will raise ZeroDivisionError at runtime. Add: if b == 0: raise ValueError("Cannot divide by zero")
+2. No type check for inputs. Passing a string like divide("x", 2) will raise TypeError. Add type validation or type hints with runtime check.
+
+--- EXAMPLE 2 ---
+Source Code:
+def calculate_discount(price, discount_percent):
+    if price < 0:
+        raise ValueError("Price cannot be negative")
+    if discount_percent < 0 or discount_percent > 100:
+        raise ValueError("Discount must be between 0 and 100")
+    return price - (price * discount_percent / 100)
+
+Coverage: 100%
+
+Good response:
+No issues found. Code is solid.
+
+--- EXAMPLE 3 ---
+Source Code:
+def get_user(users, user_id):
+    for user in users:
+        if user["id"] == user_id:
+            return user
+    return None
+
+Coverage: 90%
+
+Good response:
+1. get_user() returns None when user is not found. Callers must check for None or risk AttributeError. Consider raising a ValueError or KeyError instead.
+
+Bad response (do NOT do this):
+- "Rename users to user_list" — cosmetic, not a real issue
+- "Add docstring" — not a code issue
+- "Python float precision may cause issues" — not relevant here, no floats involved
+- "price is a built-in keyword" — factually wrong, it is not
+
+--- EXAMPLE 4 ---
+Source Code:
+def read_file(filepath):
+    with open(filepath, "r") as f:
+        return f.read()
+
+Coverage: 70%
+
+Good response:
+1. read_file() has no check for file existence. If filepath does not exist, FileNotFoundError will crash the caller. Add: if not os.path.exists(filepath): raise FileNotFoundError(f"File not found: {filepath}")
+2. No handling for permission errors. If the file is not readable, PermissionError will be raised. Wrap with try/except or check permissions first.
+3. No encoding parameter. Reading a non-UTF-8 file will raise UnicodeDecodeError. Add encoding="utf-8" or make it a parameter.
+
+--- EXAMPLE 5 ---
+Source Code:
+def read_json(filepath):
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(f"{filepath} not found")
+    with open(filepath, "r", encoding="utf-8") as f:
+        try:
+            return json.load(f)
+        except json.JSONDecodeError:
+            raise ValueError(f"Invalid JSON in {filepath}")
+
+Coverage: 100%
+
+Good response:
+No issues found. Code is solid.
+
+--- EXAMPLE 6 ---
+Source Code:
+class UserService:
+    def __init__(self):
+        self.users = []
+
+    def add_user(self, name, email):
+        user = {"name": name, "email": email}
+        self.users.append(user)
+        return user
+
+    def find_by_email(self, email):
+        for user in self.users:
+            if user["email"] == email:
+                return user
+        return None
+
+Coverage: 85%
+
+Good response:
+1. add_user() allows duplicate emails. Calling add_user("A", "a@b.com") twice creates two users with the same email. Add a duplicate check before appending.
+2. add_user() does not validate inputs. Empty string or None for name/email will be silently accepted. Add: if not name or not email: raise ValueError("name and email are required")
+
+--- EXAMPLE 7 ---
+Source Code:
+@app.route('/items', methods=['POST'])
+def create_item():
+    data = request.get_json()
+    if not data or 'name' not in data:
+        return jsonify({"error": "name is required"}), 400
+    if 'price' not in data:
+        return jsonify({"error": "price is required"}), 400
+    item = {"id": len(items) + 1, "name": data["name"], "price": data["price"]}
+    items.append(item)
+    return jsonify(item), 201
+
+Coverage: 90%
+
+Good response:
+1. No type validation for price. Passing price="abc" will be accepted and stored as a string. Add: if not isinstance(data["price"], (int, float)): return error 400.
+2. Negative price is accepted. Add: if data["price"] < 0: return error 400.
+
+--- EXAMPLE 8 ---
+Source Code:
+@app.route('/items', methods=['POST'])
+def create_item():
+    data = request.get_json()
+    if not data or 'name' not in data:
+        return jsonify({"error": "name is required"}), 400
+    if 'price' not in data or not isinstance(data['price'], (int, float)) or data['price'] < 0:
+        return jsonify({"error": "valid price is required"}), 400
+    item = {"id": len(items) + 1, "name": data["name"], "price": data["price"]}
+    items.append(item)
+    return jsonify(item), 201
+
+Coverage: 100%
+
+Good response:
+No issues found. Code is solid.
+
+Bad response (do NOT do this):
+- "Consider using a database instead of a list" — architecture suggestion, not a code bug
+- "Add logging" — not a bug or edge case
+- "The coverage is 100% but you should add more tests" — contradicts the data, tests are not your concern
+
+--- EXAMPLE 9 ---
+Source Code:
+def send_email(to, subject, body):
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["To"] = to
+    server = smtplib.SMTP("smtp.gmail.com", 587)
+    server.starttls()
+    server.login(USER, PASS)
+    server.sendmail(USER, to, msg.as_string())
+    server.quit()
+
+Coverage: 60%
+
+Good response:
+1. SMTP connection is not wrapped in try/finally. If sendmail() fails, server.quit() never runs, leaving the connection open. Use try/finally or a context manager.
+2. No validation for "to" parameter. An empty string or invalid email format will cause smtplib.SMTPRecipientsRefused at runtime.
+
+--- EXAMPLE 10 ---
+Source Code:
+def factorial(n):
+    if n < 0:
+        raise ValueError("n must be non-negative")
+    if n == 0:
+        return 1
+    return n * factorial(n - 1)
+
+Coverage: 100%
+
+Good response:
+1. factorial() has no recursion limit protection. Very large inputs like factorial(10000) will hit Python's recursion limit and raise RecursionError. Add a max value check or use an iterative approach.
+
+Bad response (do NOT do this):
+- "Use math.factorial instead" — not a bug, just an alternative implementation
+- "Add type hints" — cosmetic, not a code issue
