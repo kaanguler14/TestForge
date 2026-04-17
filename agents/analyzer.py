@@ -1,17 +1,25 @@
 import logging
-from langchain_ollama import OllamaLLM
-from . import MODEL_NAME
+from . import get_llm
 from .context import TestContext
 
 logger = logging.getLogger(__name__)
 
-llm = OllamaLLM(model=MODEL_NAME)
-
 FAILURE_PROMPT = """You are a Python debugging expert.
-Analyze the pytest output and source code together.
-Answer these two questions only:
+Analyze the pytest output, source code, and generated tests together.
+
+First, decide: is the failure caused by a wrong TEST or a real BUG in the source code?
+
+- TEST_ERROR means: the test itself is broken (wrong import, bad assertion, incorrect logic, syntax issue)
+- SOURCE_BUG means: the source code has a real bug and the test correctly caught it
+
+You MUST start your response with exactly one of these two lines:
+VERDICT: TEST_ERROR
+VERDICT: SOURCE_BUG
+
+Then explain:
 1. Why exactly did the test fail?
-2. How should the test be fixed?
+2. If TEST_ERROR: how should the test be fixed?
+   If SOURCE_BUG: what is the bug in the source code?
 Be specific and concise. No markdown."""
 
 COVERAGE_PROMPT = """You are a Python test coverage expert.
@@ -51,6 +59,7 @@ def analyze_results(ctx: TestContext) -> TestContext:
 {ctx.coverage}%
 """
 
+    llm = get_llm(ctx.analyzer_model)
     try:
         response = llm.invoke(prompt)
     except Exception as e:
@@ -59,5 +68,16 @@ def analyze_results(ctx: TestContext) -> TestContext:
         return ctx
 
     ctx.analysis = response
+
+    # Failure type sınıflandırmasını parse et
+    if ctx.failed > 0:
+        first_line = response.strip().split("\n")[0].upper()
+        if "SOURCE_BUG" in first_line:
+            ctx.failure_type = "source_bug"
+            logger.info("Analyzer verdict: SOURCE_BUG")
+        else:
+            ctx.failure_type = "test_error"
+            logger.info("Analyzer verdict: TEST_ERROR")
+
     ctx.add_to_history()
     return ctx

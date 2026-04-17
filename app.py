@@ -36,6 +36,13 @@ with st.sidebar:
     source_type = st.radio("Code type:", ["function", "api"])
     max_iter = st.slider("Max iterations:", 1, 5, 3)
     cov_threshold = st.slider("Coverage threshold (%):", 50, 100, 80)
+
+    st.divider()
+    st.subheader("Model Settings")
+    writer_model = st.text_input("Writer model:", value="qwen2.5-coder:7b")
+    analyzer_model = st.text_input("Analyzer model:", value="qwen3:8b")
+    suggester_model = st.text_input("Suggester model:", value="qwen3:8b")
+
     st.divider()
     st.markdown(
         "**How it works:**\n"
@@ -104,6 +111,9 @@ if run_clicked and code:
         source_type=source_type,
         max_iterations=max_iter,
         coverage_threshold=cov_threshold,
+        writer_model=writer_model,
+        analyzer_model=analyzer_model,
+        suggester_model=suggester_model,
     ))
 
     status = st.status("Starting AutoTestLoop...", expanded=True)
@@ -137,6 +147,8 @@ if run_clicked and code:
     st.divider()
     if final_state["failed"] == 0:
         st.success(f"All {final_state['passed']} tests passed with {final_state['coverage']}% coverage.")
+    elif final_state.get("failure_type") == "source_bug":
+        st.warning(f"Tests found real bugs in your source code. {final_state['failed']} test(s) caught source code issues.")
     else:
         st.error(f"{final_state['failed']} test(s) failed after {final_state['iteration']} iteration(s).")
 

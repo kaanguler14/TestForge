@@ -18,7 +18,11 @@ class GraphState(TypedDict):
     coverage: int
     coverage_threshold: int
     analysis: Optional[str]
+    failure_type: Optional[str]
     suggestions: Optional[str]
+    writer_model: str
+    analyzer_model: str
+    suggester_model: str
     iteration: int
     max_iterations: int
     history: list

@@ -1,12 +1,9 @@
 import re
 import logging
-from langchain_ollama import OllamaLLM
-from . import MODEL_NAME
+from . import get_llm
 from .context import TestContext
 
 logger = logging.getLogger(__name__)
-
-llm = OllamaLLM(model=MODEL_NAME)
 
 FUNCTION_PROMPT = """You are a senior test engineer.
 Write pytest tests for the given source code.
@@ -40,6 +37,7 @@ def write_tests(ctx: TestContext) -> TestContext:
     system_prompt = API_PROMPT if ctx.source_type == "api" else FUNCTION_PROMPT
     prompt = system_prompt + "\n" + ctx.build_writer_context()
 
+    llm = get_llm(ctx.writer_model)
     try:
         response = llm.invoke(prompt)
     except Exception as e:

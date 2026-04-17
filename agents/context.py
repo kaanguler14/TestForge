@@ -21,9 +21,15 @@ class TestContext:
 
     # Ajan 3 çıktısı
     analysis: Optional[str] = None
+    failure_type: Optional[str] = None  # "test_error" veya "source_bug"
 
     # Ajan 4 çıktısı
     suggestions: Optional[str] = None
+
+    # Model ayarları — her ajan farklı model kullanabilir
+    writer_model: str = "qwen2.5-coder:7b"
+    analyzer_model: str = "qwen3:8b"
+    suggester_model: str = "qwen3:8b"
 
     # Döngü yönetimi
     iteration: int = 0
@@ -32,6 +38,8 @@ class TestContext:
 
     def should_retry(self) -> bool:
         if self.iteration >= self.max_iterations:
+            return False
+        if self.failure_type == "source_bug":
             return False
         if self.failed > 0:
             return True

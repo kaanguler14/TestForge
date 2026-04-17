@@ -6,8 +6,11 @@ def divide(a, b):
 Coverage: 80%
 
 Good response:
-1. divide() has no check for b=0. This will raise ZeroDivisionError at runtime. Add: if b == 0: raise ValueError("Cannot divide by zero")
-2. No type check for inputs. Passing a string like divide("x", 2) will raise TypeError. Add type validation or type hints with runtime check.
+1. divide() has no check for b=0. Input: b=0, line "return a / b" crashes with ZeroDivisionError. Fix: add if b == 0: raise ValueError("Cannot divide by zero")
+
+Bad response (do NOT do this):
+- "Floating-point precision issue with division" — not a bug, Python handles this correctly
+- "No type check for inputs" — if someone passes a string, Python raises TypeError naturally. Not every TypeError needs a manual check.
 
 --- EXAMPLE 2 ---
 Source Code:
@@ -20,8 +23,19 @@ def calculate_discount(price, discount_percent):
 
 Coverage: 100%
 
+Pytest Output:
+4 passed, 2 failed
+FAILED test_happy_path - assert 8.792 == 8.0
+FAILED test_zero_price - Failed: DID NOT RAISE <class 'ValueError'>
+
 Good response:
 No issues found. Code is solid.
+
+Bad response (do NOT do this):
+- "Floating-point precision issue" — Python float math is fine here, 10 * 20 / 100 = 2.0 exactly. Not a bug.
+- "Missing key in input data" — price and discount_percent are function PARAMETERS, not dict keys. They cannot be missing.
+- "Add type checking for non-numeric inputs" — the code has if-checks that will raise TypeError naturally if non-numeric. Not a crash the code should handle.
+- "The test_zero_price test failed" — that is a TEST problem, not a SOURCE CODE problem. price=0 is valid.
 
 --- EXAMPLE 3 ---
 Source Code:

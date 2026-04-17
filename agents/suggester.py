@@ -1,39 +1,39 @@
 import os
 import logging
-from langchain_ollama import OllamaLLM
-from . import MODEL_NAME
+from . import get_llm
 from .context import TestContext
 
 logger = logging.getLogger(__name__)
 
-llm = OllamaLLM(model=MODEL_NAME)
+COT_PROMPT = """You are a Python code reviewer. Find ONLY real bugs in the source code.
 
-COT_PROMPT = """You are a senior Python code reviewer. Analyze the source code step by step.
+Follow these 3 steps:
 
-You MUST follow these steps IN ORDER. Write your answer for each step.
+STEP 1 - FIND DANGEROUS INPUTS:
+For each function, list inputs that would crash it. Use the pytest output to see what already failed.
+Only list inputs where the code has NO protection (no if-check, no try/except).
 
-STEP 1 - LIST FUNCTIONS:
-List every function/method in the source code. For each one write its name and what it does in one sentence.
+STEP 2 - TRACE EACH ONE:
+For each dangerous input from Step 1, run through the code line by line.
+Write: the input, what each line does, and whether it crashes or is handled.
+If the code has an if-check or try/except that catches it, write "HANDLED" and move on.
 
-STEP 2 - DANGEROUS INPUTS:
-For each function, list inputs that could cause a crash or unexpected behavior. Examples: zero, negative, None, empty string, wrong type, very large number, missing key.
+STEP 3 - VERDICT:
+List ONLY the issues where Step 2 proved the code crashes. For each one write:
+- The exact input that causes the crash
+- The exact line that crashes
+- How to fix it (short, code only)
+If everything is handled, write: "No issues found. Code is solid."
 
-STEP 3 - TRACE THE CODE:
-For each dangerous input from Step 2, trace the code line by line:
-- Write the input value
-- Write what each line does with that input
-- Write the final result: does it crash, or does the code already handle it?
-
-STEP 4 - FINAL VERDICT:
-Based ONLY on Step 3 traces, list issues where the code actually crashes or misbehaves.
-Format: numbered list, each with: what goes wrong, with what input, and how to fix it.
-If all dangerous inputs are already handled, write exactly: "No issues found. Code is solid."
-
-IMPORTANT:
-- Do NOT suggest renaming, comments, docstrings, or style changes
-- Do NOT recommend tools or frameworks
-- Do NOT suggest improvements to the tests, only to the source code
-- If Step 3 shows the code handles it, do NOT list it in Step 4
+RULES:
+- ONLY report bugs you proved in Step 2 with a specific input and a specific crashing line
+- If the code has an if/try that catches the input, it is NOT a bug
+- Do NOT suggest type checking unless the function truly crashes with wrong types
+- Do NOT mention floating-point precision — it is never a bug
+- Do NOT suggest changes to tests — only review the source code
+- Do NOT suggest renaming, comments, docstrings, logging, or style changes
+- Do NOT recommend tools, frameworks, or alternative implementations
+- When in doubt, say "No issues found. Code is solid."
 """
 
 def _load_examples() -> str:
@@ -49,9 +49,13 @@ def suggest_improvements(ctx: TestContext) -> TestContext:
     examples = _load_examples()
     prompt = f"""{COT_PROMPT}
 
+--- EXAMPLES START (for reference only, do NOT analyze these) ---
 {examples}
+--- EXAMPLES END ---
 
-### Source Code
+Now analyze ONLY the following source code. Ignore all code in the examples above.
+
+### Source Code to Analyze
 {ctx.source_code}
 
 ### Test Results
@@ -59,8 +63,12 @@ Passed: {ctx.passed}, Failed: {ctx.failed}
 
 ### Coverage
 {ctx.coverage}%
+
+### Pytest Output
+{ctx.test_output or "No test output available"}
 """
 
+    llm = get_llm(ctx.suggester_model)
     try:
         response = llm.invoke(prompt)
     except Exception as e:
