@@ -185,3 +185,45 @@ Good response:
 Bad response (do NOT do this):
 - "Use math.factorial instead" — not a bug, just an alternative implementation
 - "Add type hints" — cosmetic, not a code issue
+
+--- EXAMPLE 11 (logic / validation bugs — silent misbehavior) ---
+Source Code:
+def process_order(items, discount_percent, tax_rate):
+    subtotal = 0
+    for item in items:
+        subtotal += item['price'] * item['quantity']
+    discount = subtotal * discount_percent / 100
+    total = subtotal - discount
+    tax = total * tax_rate / 100
+    return total + tax
+
+Coverage: 90%
+
+Good response:
+1. items=None crashes on "for item in items" with TypeError. Fix: if items is None: raise ValueError("items cannot be None")
+2. Missing 'price' or 'quantity' key crashes with KeyError on item['price']. Fix: validate each item has both keys, or raise ValueError if missing.
+3. Negative discount_percent is silently accepted and INCREASES the total (discount becomes negative). Input: discount_percent=-10, subtotal=100 → discount=-10, total=110. That is wrong. Fix: if discount_percent < 0 or discount_percent > 100: raise ValueError("discount_percent must be between 0 and 100")
+4. discount_percent > 100 produces a negative total silently. Input: discount_percent=150, subtotal=100 → discount=150, total=-50. Impossible value returned. Same fix as #3.
+5. Negative tax_rate is silently accepted and reduces the total. Input: tax_rate=-10 → tax is negative. Fix: if tax_rate < 0: raise ValueError("tax_rate cannot be negative")
+
+Bad response (do NOT do this):
+- "Use Decimal instead of float for money" — alternative implementation, not a bug
+- "Add logging of subtotal" — not a bug
+- "Consider moving validation to a separate function" — refactor suggestion, not a bug
+
+--- EXAMPLE 12 (logic bug — negative quantity accepted) ---
+Source Code:
+def add_to_cart(cart, item_id, quantity):
+    if item_id not in cart:
+        cart[item_id] = 0
+    cart[item_id] += quantity
+    return cart
+
+Coverage: 100%
+
+Good response:
+1. Negative quantity is silently accepted and reduces stored count. Input: add_to_cart({}, "x", -5) → cart becomes {"x": -5}. A cart with negative quantity is nonsensical. Fix: if quantity <= 0: raise ValueError("quantity must be positive")
+
+Bad response (do NOT do this):
+- "Use collections.defaultdict" — alternative implementation, not a bug
+- "Return a copy of cart instead of mutating" — style preference, not a bug

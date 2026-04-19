@@ -55,12 +55,14 @@ with st.sidebar:
 
 # --- Örnek kodlar ---
 examples = {
-    "function": '''def calculate_discount(price, discount_percent):
-    if price < 0:
-        raise ValueError("Price cannot be negative")
-    if discount_percent < 0 or discount_percent > 100:
-        raise ValueError("Discount must be between 0 and 100")
-    return price - (price * discount_percent / 100)''',
+    "function": '''def process_order(items, discount_percent, tax_rate):
+    subtotal = 0
+    for item in items:
+        subtotal += item['price'] * item['quantity']
+    discount = subtotal * discount_percent / 100
+    total = subtotal - discount
+    tax = total * tax_rate / 100
+    return total + tax''',
     "api": '''from flask import Flask, request, jsonify
 
 app = Flask(__name__)
