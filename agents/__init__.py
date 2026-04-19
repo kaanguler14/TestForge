@@ -11,5 +11,5 @@ _llm_cache = {}
 def get_llm(model: str = MODEL_NAME):
     if model not in _llm_cache:
         from langchain_ollama import OllamaLLM
-        _llm_cache[model] = OllamaLLM(model=model)
+        _llm_cache[model] = OllamaLLM(model=model, temperature=0)
     return _llm_cache[model]
