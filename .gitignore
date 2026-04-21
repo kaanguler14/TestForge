@@ -1,6 +1,12 @@
-sandbox/source_code.py
-sandbox/.pytest_cache/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 .pytest_cache/
+.coverage
+
+logs/
+runs/
+sandbox/
+
 CLAUDE.md
