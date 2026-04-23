@@ -8,5 +8,6 @@ __pycache__/
 logs/
 runs/
 sandbox/
+benchmarks/_last_run.log
 
 CLAUDE.md

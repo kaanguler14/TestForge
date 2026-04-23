@@ -1,0 +1,578 @@
+[
+  {
+    "result": {
+      "case_id": "01_validated_divide",
+      "error": "TIMEOUT after 120s",
+      "latency_sec": 120.0,
+      "iterations": 0,
+      "failure_type": null,
+      "suggestions_structured": {},
+      "analysis_structured": {}
+    },
+    "score": {
+      "verdict_match": false,
+      "expected_failure_type": null,
+      "actual_failure_type": null,
+      "expected_bug_count": 0,
+      "matched_bug_count": 0,
+      "unmatched_bugs": [],
+      "bug_recall": null,
+      "false_positives": 0,
+      "findings_count": 0,
+      "is_clean_case": true
+    }
+  },
+  {
+    "result": {
+      "case_id": "02_safe_read_json",
+      "latency_sec": 70.39037520007696,
+      "iterations": 1,
+      "failure_type": null,
+      "passed": 3,
+      "failed": 0,
+      "coverage": 100,
+      "run_id": "6c42c543",
+      "artifact_dir": "D:\\AutoTest\\runs\\6c42c543_function",
+      "suggestions_structured": {
+        "verdict": "BUGS_FOUND",
+        "summary": "Fallback parser was used for suggester output.",
+        "findings": [
+          {
+            "category": "logic_bug",
+            "input": "See raw suggester output",
+            "problem": "### Analysis of the `read_json` Function\n\nThe `read_json` function is designed to read a JSON file from a given file path. It performs the following steps:\n\n1. **Checks if the file exists** using `os.path.exists`.\n2. **Opens the file** with UTF-8 encoding.\n3. **Attempts to parse the JSON** using `json.load`.\n4. **Catches `json.JSONDecodeError`** and raises a `ValueError` with a descriptive message.\n\n---\n\n### ✅ **Test Coverage and Results**\n\n- **All tests passed**:\n  - `test_read_json_valid_file`: Confirms valid JSON is parsed correctly.\n  - `test_read_json_nonexistent_file`: Ensures the function raises `FileNotFoundError` when the file does not exist.\n  - `test_read_json_invalid_json`: Verifies that invalid JSON raises a `ValueError`.\n\n- **100% code coverage** is reported, which suggests that all lines of code are tested. However, **code coverage does not guarantee robustness** in all edge cases.\n\n---\n\n### 🔍 **Potential Issues and Bug Classification**\n\n#### 1. **Uncaught `PermissionError` (Crash Bug)**\n\n- **Scenario**: The file exists, but the process lacks permission to read it.\n- **Issue**: The `open()` call will raise a `PermissionError`, which is **not caught** by the function.\n- **Impact**: This will cause the function to crash without any user-friendly error message.\n- **Fix**: Wrap the `open()` call in a `try-except` block to catch `PermissionError` and handle it gracefully.\n\n#### 2. **Uncaught `UnicodeDecodeError` (Crash Bug)**\n\n- **Scenario**: The file exists and is readable, but it uses a different encoding (e.g., `latin-1`, `utf-16`).\n- **Issue**: The `open()` call assumes UTF-8 encoding, but if the file uses a different encoding, it will raise a `UnicodeDecodeError`, which is **not caught**.\n- **Impact**: This will cause the function to crash without any user-friendly error message.\n- **Fix**: Either:\n  - Allow the user to specify the encoding, or\n  - Use a more robust decoding strategy (e.g., `errors='ignore'` or `errors='replace'`).\n\n---\n\n### 📌 **Summary of Findings**\n\n| Bug Type         | Description                                                                 | Fix Suggestion                                                                 |\n|------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------|\n| **Crash Bug**    | Unhandled `PermissionError` when opening the file                          | Wrap `open()` in a `try-except` block to catch `PermissionError`              |\n| **Crash Bug**    | Unhandled `UnicodeDecodeError` for non-UTF-8 files                        | Use `errors='ignore'` or `errors='replace'` when opening the file             |\n\n---\n\n### ✅ **Conclusion**\n\nWhile the function passes all current tests and has 100% code coverage, it is **not robust** against all possible file access and encoding scenarios. The function should be updated to handle `PermissionError` and `UnicodeDecodeError` to avoid unhandled exceptions and improve user experience.",
+            "fix_hint": "Review the raw suggester output manually."
+          }
+        ]
+      },
+      "analysis_structured": {}
+    },
+    "score": {
+      "verdict_match": true,
+      "expected_failure_type": null,
+      "actual_failure_type": null,
+      "expected_bug_count": 0,
+      "matched_bug_count": 0,
+      "unmatched_bugs": [],
+      "bug_recall": null,
+      "false_positives": 1,
+      "findings_count": 1,
+      "is_clean_case": true
+    }
+  },
+  {
+    "result": {
+      "case_id": "03_validated_discount",
+      "error": "TIMEOUT after 120s",
+      "latency_sec": 120.0,
+      "iterations": 0,
+      "failure_type": null,
+      "suggestions_structured": {},
+      "analysis_structured": {}
+    },
+    "score": {
+      "verdict_match": false,
+      "expected_failure_type": null,
+      "actual_failure_type": null,
+      "expected_bug_count": 0,
+      "matched_bug_count": 0,
+      "unmatched_bugs": [],
+      "bug_recall": null,
+      "false_positives": 0,
+      "findings_count": 0,
+      "is_clean_case": true
+    }
+  },
+  {
+    "result": {
+      "case_id": "04_guarded_factorial",
+      "error": "TIMEOUT after 120s",
+      "latency_sec": 120.0,
+      "iterations": 0,
+      "failure_type": null,
+      "suggestions_structured": {},
+      "analysis_structured": {}
+    },
+    "score": {
+      "verdict_match": false,
+      "expected_failure_type": null,
+      "actual_failure_type": null,
+      "expected_bug_count": 0,
+      "matched_bug_count": 0,
+      "unmatched_bugs": [],
+      "bug_recall": null,
+      "false_positives": 0,
+      "findings_count": 0,
+      "is_clean_case": true
+    }
+  },
+  {
+    "result": {
+      "case_id": "05_validated_user_api",
+      "error": "TIMEOUT after 120s",
+      "latency_sec": 120.0,
+      "iterations": 0,
+      "failure_type": null,
+      "suggestions_structured": {},
+      "analysis_structured": {}
+    },
+    "score": {
+      "verdict_match": false,
+      "expected_failure_type": null,
+      "actual_failure_type": null,
+      "expected_bug_count": 0,
+      "matched_bug_count": 0,
+      "unmatched_bugs": [],
+      "bug_recall": null,
+      "false_positives": 0,
+      "findings_count": 0,
+      "is_clean_case": true
+    }
+  },
+  {
+    "result": {
+      "case_id": "06_divide_crash",
+      "latency_sec": 74.43035700009204,
+      "iterations": 1,
+      "failure_type": null,
+      "passed": 4,
+      "failed": 0,
+      "coverage": 100,
+      "run_id": "a16f8e01",
+      "artifact_dir": "D:\\AutoTest\\runs\\a16f8e01_function",
+      "suggestions_structured": {
+        "verdict": "BUGS_FOUND",
+        "summary": "Fallback parser was used for suggester output.",
+        "findings": [
+          {
+            "category": "logic_bug",
+            "input": "See raw suggester output",
+            "problem": "### Analysis of the `divide` Function\n\nThe function `divide(a, b)` performs a simple division operation: `return a / b`. While this is syntactically correct, it lacks critical error handling for a common edge case: **division by zero**.\n\n---\n\n### ✅ Test Results and Coverage\n\n- **All 4 tests passed**.\n- **100% code coverage**.\n\nThis suggests that the current test suite does not include a test case for division by zero. However, the absence of such a test does not justify the lack of error handling in the function itself.\n\n---\n\n### 🔴 Crash Bug: Division by Zero\n\nIf `b == 0`, the function will raise a `ZeroDivisionError` at runtime. This is a **critical crash bug** because:\n\n- It will cause the program to terminate abruptly.\n- It is a common and expected edge case in division operations.\n- The function does **not** handle or validate the input for this scenario.\n\n---\n\n### 🛠️ Recommended Fix\n\nTo prevent the crash, the function should validate the input and raise a meaningful exception (e.g., `ValueError`) when `b == 0`. This ensures the function behaves predictably and avoids unhandled exceptions.\n\n```python\ndef divide(a, b):\n    if b == 0:\n        raise ValueError(\"Division by zero is not allowed.\")\n    return a / b\n```\n\n---\n\n### 📌 Summary\n\n| Bug Type       | Description                          | Fix Suggestion                          |\n|----------------|--------------------------------------|------------------------------------------|\n| **Crash Bug**  | Division by zero causes `ZeroDivisionError` | Add input validation and raise `ValueError` when `b == 0` |\n\nThis function is **currently unsafe** for real-world use due to the lack of input validation. The test suite should also be updated to include a test case for division by zero to ensure robustness.",
+            "fix_hint": "Review the raw suggester output manually."
+          }
+        ]
+      },
+      "analysis_structured": {}
+    },
+    "score": {
+      "verdict_match": false,
+      "expected_failure_type": "source_bug",
+      "actual_failure_type": null,
+      "expected_bug_count": 1,
+      "matched_bug_count": 0,
+      "unmatched_bugs": [
+        {
+          "category": "crash_bug",
+          "keywords": [
+            "zero"
+          ]
+        }
+      ],
+      "bug_recall": 0.0,
+      "false_positives": 0,
+      "findings_count": 1,
+      "is_clean_case": false
+    }
+  },
+  {
+    "result": {
+      "case_id": "07_dict_key_crash",
+      "latency_sec": 63.70559290004894,
+      "iterations": 1,
+      "failure_type": "source_bug",
+      "passed": 1,
+      "failed": 2,
+      "coverage": 100,
+      "run_id": "a06b2a23",
+      "artifact_dir": "D:\\AutoTest\\runs\\a06b2a23_function",
+      "suggestions_structured": {
+        "verdict": "BUGS_FOUND",
+        "summary": "No validation for user_id existence in dictionary",
+        "findings": [
+          {
+            "category": "crash_bug",
+            "input": "user_id=1 or 2 when not present in users_by_id",
+            "problem": "Direct dictionary access raises KeyError without validation",
+            "fix_hint": "Add check for user_id existence in users_by_id before accessing"
+          }
+        ]
+      },
+      "analysis_structured": {
+        "mode": "failure_analysis",
+        "verdict": "SOURCE_BUG",
+        "reason": "Code raises KeyError instead of expected ValueError for invalid inputs",
+        "fix_hint": "Add validation to raise ValueError when user_id is missing or invalid",
+        "evidence": [
+          "Test expects ValueError for empty users_by_id but gets KeyError: 1",
+          "Test expects ValueError for invalid user_id 2 but gets KeyError: 2"
+        ]
+      }
+    },
+    "score": {
+      "verdict_match": true,
+      "expected_failure_type": "source_bug",
+      "actual_failure_type": "source_bug",
+      "expected_bug_count": 1,
+      "matched_bug_count": 1,
+      "unmatched_bugs": [],
+      "bug_recall": 1.0,
+      "false_positives": 0,
+      "findings_count": 1,
+      "is_clean_case": false
+    }
+  },
+  {
+    "result": {
+      "case_id": "08_list_index_crash",
+      "error": "TIMEOUT after 120s",
+      "latency_sec": 120.0,
+      "iterations": 0,
+      "failure_type": null,
+      "suggestions_structured": {},
+      "analysis_structured": {}
+    },
+    "score": {
+      "verdict_match": false,
+      "expected_failure_type": "source_bug",
+      "actual_failure_type": null,
+      "expected_bug_count": 1,
+      "matched_bug_count": 0,
+      "unmatched_bugs": [
+        {
+          "category": "crash_bug",
+          "keywords": [
+            "index"
+          ]
+        }
+      ],
+      "bug_recall": 0.0,
+      "false_positives": 0,
+      "findings_count": 0,
+      "is_clean_case": false
+    }
+  },
+  {
+    "result": {
+      "case_id": "09_file_read_crash",
+      "error": "TIMEOUT after 120s",
+      "latency_sec": 120.0,
+      "iterations": 0,
+      "failure_type": null,
+      "suggestions_structured": {},
+      "analysis_structured": {}
+    },
+    "score": {
+      "verdict_match": false,
+      "expected_failure_type": "source_bug",
+      "actual_failure_type": null,
+      "expected_bug_count": 1,
+      "matched_bug_count": 0,
+      "unmatched_bugs": [
+        {
+          "category": "crash_bug",
+          "keywords": [
+            "file"
+          ]
+        }
+      ],
+      "bug_recall": 0.0,
+      "false_positives": 0,
+      "findings_count": 0,
+      "is_clean_case": false
+    }
+  },
+  {
+    "result": {
+      "case_id": "10_parse_int_crash",
+      "latency_sec": 64.5987164999824,
+      "iterations": 1,
+      "failure_type": "source_bug",
+      "passed": 4,
+      "failed": 1,
+      "coverage": 100,
+      "run_id": "a7c9133e",
+      "artifact_dir": "D:\\AutoTest\\runs\\a7c9133e_function",
+      "suggestions_structured": {
+        "verdict": "BUGS_FOUND",
+        "summary": "Negative age values are accepted without validation.",
+        "findings": [
+          {
+            "category": "logic_bug",
+            "input": "-5",
+            "problem": "Negative integer is converted to int without error, but age cannot be negative",
+            "fix_hint": "Add check: if int(raw) < 0: raise ValueError('Age cannot be negative')"
+          }
+        ]
+      },
+      "analysis_structured": {
+        "mode": "failure_analysis",
+        "verdict": "SOURCE_BUG",
+        "reason": "Code accepts negative numbers without validation",
+        "fix_hint": "Add input validation to raise ValueError for invalid cases",
+        "evidence": [
+          "Test expects ValueError for '-1' but no exception raised",
+          "Python's int() conversion silently accepts negative strings"
+        ]
+      }
+    },
+    "score": {
+      "verdict_match": true,
+      "expected_failure_type": "source_bug",
+      "actual_failure_type": "source_bug",
+      "expected_bug_count": 1,
+      "matched_bug_count": 0,
+      "unmatched_bugs": [
+        {
+          "category": "crash_bug",
+          "keywords": [
+            "int"
+          ]
+        }
+      ],
+      "bug_recall": 0.0,
+      "false_positives": 0,
+      "findings_count": 1,
+      "is_clean_case": false
+    }
+  },
+  {
+    "result": {
+      "case_id": "11_process_order",
+      "error": "TIMEOUT after 120s",
+      "latency_sec": 120.0,
+      "iterations": 0,
+      "failure_type": null,
+      "suggestions_structured": {},
+      "analysis_structured": {}
+    },
+    "score": {
+      "verdict_match": false,
+      "expected_failure_type": "source_bug",
+      "actual_failure_type": null,
+      "expected_bug_count": 2,
+      "matched_bug_count": 0,
+      "unmatched_bugs": [
+        {
+          "category": "logic_bug",
+          "keywords": [
+            "negative",
+            "discount"
+          ]
+        },
+        {
+          "category": "logic_bug",
+          "keywords": [
+            "negative",
+            "tax"
+          ]
+        }
+      ],
+      "bug_recall": 0.0,
+      "false_positives": 0,
+      "findings_count": 0,
+      "is_clean_case": false
+    }
+  },
+  {
+    "result": {
+      "case_id": "12_cart_negative_qty",
+      "latency_sec": 76.81421469990164,
+      "iterations": 1,
+      "failure_type": "source_bug",
+      "passed": 3,
+      "failed": 3,
+      "coverage": 100,
+      "run_id": "a91f3c2b",
+      "artifact_dir": "D:\\AutoTest\\runs\\a91f3c2b_function",
+      "suggestions_structured": {
+        "verdict": "BUGS_FOUND",
+        "summary": "Missing input validation for quantity and item_id, allowing invalid values that should raise ValueErrors.",
+        "findings": [
+          {
+            "category": "logic_bug",
+            "input": "add_to_cart({}, 'x', -5)",
+            "problem": "Negative quantity is stored, producing a cart with a nonsensical count",
+            "fix_hint": "if quantity <= 0: raise ValueError('quantity must be positive')"
+          },
+          {
+            "category": "logic_bug",
+            "input": "add_to_cart({}, None, 5)",
+            "problem": "None item_id is allowed, but tests expect ValueError",
+            "fix_hint": "if item_id is None: raise ValueError('item_id cannot be None')"
+          },
+          {
+            "category": "logic_bug",
+            "input": "add_to_cart({}, '', 5)",
+            "problem": "Empty string item_id is allowed, but tests expect ValueError",
+            "fix_hint": "if item_id == '': raise ValueError('item_id cannot be empty string')"
+          }
+        ]
+      },
+      "analysis_structured": {
+        "mode": "failure_analysis",
+        "verdict": "SOURCE_BUG",
+        "reason": "Code accepts invalid inputs (negative quantity, None/empty string item_id) without validation",
+        "fix_hint": "Add validation for quantity >= 0 and item_id being a non-empty string",
+        "evidence": [
+          "test_add_to_cart_negative_quantity failed (expected ValueError)",
+          "test_add_to_cart_none_item_id failed (expected ValueError)",
+          "test_add_to_cart_empty_string_item_id failed (expected ValueError)"
+        ]
+      }
+    },
+    "score": {
+      "verdict_match": true,
+      "expected_failure_type": "source_bug",
+      "actual_failure_type": "source_bug",
+      "expected_bug_count": 1,
+      "matched_bug_count": 1,
+      "unmatched_bugs": [],
+      "bug_recall": 1.0,
+      "false_positives": 0,
+      "findings_count": 3,
+      "is_clean_case": false
+    }
+  },
+  {
+    "result": {
+      "case_id": "13_apply_discount_over",
+      "latency_sec": 94.66479169996455,
+      "iterations": 1,
+      "failure_type": "source_bug",
+      "passed": 4,
+      "failed": 6,
+      "coverage": 100,
+      "run_id": "d78f4925",
+      "artifact_dir": "D:\\AutoTest\\runs\\d78f4925_function",
+      "suggestions_structured": {
+        "verdict": "BUGS_FOUND",
+        "summary": "No input validation; several invalid inputs crash or produce incorrect results.",
+        "findings": [
+          {
+            "category": "crash_bug",
+            "input": "price=None, discount_percent=5",
+            "problem": "Multiplying None by float raises TypeError",
+            "fix_hint": "Add type checks for price and discount_percent; raise ValueError for invalid types"
+          },
+          {
+            "category": "crash_bug",
+            "input": "price='100', discount_percent=5",
+            "problem": "Multiplying string by float raises TypeError",
+            "fix_hint": "Add type checks for price and discount_percent; raise ValueError for invalid types"
+          },
+          {
+            "category": "logic_bug",
+            "input": "price=-100, discount_percent=10",
+            "problem": "Negative price produces invalid result (-90) instead of raising error",
+            "fix_hint": "Add range validation for price; raise ValueError for negative values"
+          },
+          {
+            "category": "logic_bug",
+            "input": "discount_percent=-10, price=100",
+            "problem": "Negative discount produces invalid result (110) instead of raising error",
+            "fix_hint": "Add range validation for discount_percent (0-100); raise ValueError for invalid values"
+          },
+          {
+            "category": "crash_bug",
+            "input": "discount_percent=None, price=100",
+            "problem": "Dividing None by int raises TypeError",
+            "fix_hint": "Add type checks for discount_percent; raise ValueError for invalid types"
+          },
+          {
+            "category": "crash_bug",
+            "input": "discount_percent='5', price=100",
+            "problem": "Dividing string by int raises TypeError",
+            "fix_hint": "Add type checks for discount_percent; raise ValueError for invalid types"
+          }
+        ]
+      },
+      "analysis_structured": {
+        "mode": "failure_analysis",
+        "verdict": "SOURCE_BUG",
+        "reason": "Source code lacks input validation for None, non-numeric, and negative values",
+        "fix_hint": "Add type checks and value validation in the source code to raise appropriate exceptions",
+        "evidence": [
+          "TypeError: unsupported operand type(s) for *: 'NoneType' and 'float'",
+          "TypeError: can't multiply sequence by non-int of type 'float'",
+          "Failed: DID NOT RAISE <class 'ValueError'> for negative price",
+          "TypeError: unsupported operand type(s) for /: 'NoneType' and 'int'",
+          "TypeError: unsupported operand type(s) for /: 'str' and 'int'",
+          "Failed: DID NOT RAISE <class 'ValueError'> for negative discount percent"
+        ]
+      }
+    },
+    "score": {
+      "verdict_match": true,
+      "expected_failure_type": "source_bug",
+      "actual_failure_type": "source_bug",
+      "expected_bug_count": 1,
+      "matched_bug_count": 1,
+      "unmatched_bugs": [],
+      "bug_recall": 1.0,
+      "false_positives": 0,
+      "findings_count": 6,
+      "is_clean_case": false
+    }
+  },
+  {
+    "result": {
+      "case_id": "14_inventory_negative",
+      "error": "TIMEOUT after 120s",
+      "latency_sec": 120.0,
+      "iterations": 0,
+      "failure_type": null,
+      "suggestions_structured": {},
+      "analysis_structured": {}
+    },
+    "score": {
+      "verdict_match": false,
+      "expected_failure_type": "source_bug",
+      "actual_failure_type": null,
+      "expected_bug_count": 1,
+      "matched_bug_count": 0,
+      "unmatched_bugs": [
+        {
+          "category": "logic_bug",
+          "keywords": [
+            "negative"
+          ]
+        }
+      ],
+      "bug_recall": 0.0,
+      "false_positives": 0,
+      "findings_count": 0,
+      "is_clean_case": false
+    }
+  },
+  {
+    "result": {
+      "case_id": "15_transfer_negative_amount",
+      "error": "TIMEOUT after 120s",
+      "latency_sec": 120.0,
+      "iterations": 0,
+      "failure_type": null,
+      "suggestions_structured": {},
+      "analysis_structured": {}
+    },
+    "score": {
+      "verdict_match": false,
+      "expected_failure_type": "source_bug",
+      "actual_failure_type": null,
+      "expected_bug_count": 1,
+      "matched_bug_count": 0,
+      "unmatched_bugs": [
+        {
+          "category": "logic_bug",
+          "keywords": [
+            "negative",
+            "amount"
+          ]
+        }
+      ],
+      "bug_recall": 0.0,
+      "false_positives": 0,
+      "findings_count": 0,
+      "is_clean_case": false
+    }
+  }
+]

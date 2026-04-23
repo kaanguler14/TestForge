@@ -1,0 +1,10 @@
+{
+  "n_cases": 15,
+  "verdict_accuracy": 0.4,
+  "bug_recall": 0.18181818181818182,
+  "false_positive_rate": 0.6,
+  "avg_latency_sec": 128.98564237999574,
+  "avg_iterations": 0.6666666666666666,
+  "error_cases": 6,
+  "timestamp": "2026-04-23_20-40-42"
+}

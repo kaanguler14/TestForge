@@ -1,0 +1,25 @@
+[
+  {
+    "result": {
+      "case_id": "01_validated_divide",
+      "error": "TIMEOUT after 120s",
+      "latency_sec": 120.0,
+      "iterations": 0,
+      "failure_type": null,
+      "suggestions_structured": {},
+      "analysis_structured": {}
+    },
+    "score": {
+      "verdict_match": true,
+      "expected_failure_type": null,
+      "actual_failure_type": null,
+      "expected_bug_count": 0,
+      "matched_bug_count": 0,
+      "unmatched_bugs": [],
+      "bug_recall": null,
+      "false_positives": 0,
+      "findings_count": 0,
+      "is_clean_case": true
+    }
+  }
+]
