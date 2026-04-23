@@ -5,12 +5,6 @@ function and want a pytest suite for it without writing one by hand
 and without sending the source off to a paid API. Runs entirely
 against local Ollama models.
 
-## Status
-
-Work in progress. Function mode is the stable manual-testing path; API
-mode is present but less battle-tested. See `CLAUDE.md` for the
-running roadmap and the list of known issues.
-
 ## How it works
 
 ```mermaid
