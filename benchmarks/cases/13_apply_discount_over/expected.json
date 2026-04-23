@@ -1,0 +1,10 @@
+{
+  "case_id": "13_apply_discount_over",
+  "description": "discount_percent >100 silently produces a negative price",
+  "source_type": "function",
+  "expected_category": "logic",
+  "expected_failure_type": "source_bug",
+  "expected_bugs": [
+    {"category": "logic_bug", "keywords": ["discount"]}
+  ]
+}

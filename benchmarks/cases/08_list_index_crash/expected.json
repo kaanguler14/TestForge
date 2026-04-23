@@ -1,0 +1,10 @@
+{
+  "case_id": "08_list_index_crash",
+  "description": "Out-of-bounds index raises IndexError",
+  "source_type": "function",
+  "expected_category": "crash",
+  "expected_failure_type": "source_bug",
+  "expected_bugs": [
+    {"category": "crash_bug", "keywords": ["index"]}
+  ]
+}

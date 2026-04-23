@@ -1,0 +1,8 @@
+{
+  "case_id": "03_validated_discount",
+  "description": "Discount calculator with full range validation",
+  "source_type": "function",
+  "expected_category": "clean",
+  "expected_failure_type": null,
+  "expected_bugs": []
+}

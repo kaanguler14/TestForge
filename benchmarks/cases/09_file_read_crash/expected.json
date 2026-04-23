@@ -1,0 +1,10 @@
+{
+  "case_id": "09_file_read_crash",
+  "description": "Unchecked open() raises FileNotFoundError",
+  "source_type": "function",
+  "expected_category": "crash",
+  "expected_failure_type": "source_bug",
+  "expected_bugs": [
+    {"category": "crash_bug", "keywords": ["file"]}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "case_id": "11_process_order",
+  "description": "Order total with no validation — accepts negatives and crashes on bad keys",
+  "source_type": "function",
+  "expected_category": "logic",
+  "expected_failure_type": "source_bug",
+  "expected_bugs": [
+    {"category": "logic_bug", "keywords": ["negative", "discount"]},
+    {"category": "logic_bug", "keywords": ["negative", "tax"]}
+  ]
+}

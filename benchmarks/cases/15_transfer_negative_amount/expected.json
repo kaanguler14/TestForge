@@ -1,0 +1,10 @@
+{
+  "case_id": "15_transfer_negative_amount",
+  "description": "transfer_funds silently accepts negative amount (reverse transfer)",
+  "source_type": "function",
+  "expected_category": "logic",
+  "expected_failure_type": "source_bug",
+  "expected_bugs": [
+    {"category": "logic_bug", "keywords": ["negative", "amount"]}
+  ]
+}

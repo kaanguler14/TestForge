@@ -1,0 +1,10 @@
+{
+  "case_id": "06_divide_crash",
+  "description": "Unchecked divide raises ZeroDivisionError on b=0",
+  "source_type": "function",
+  "expected_category": "crash",
+  "expected_failure_type": "source_bug",
+  "expected_bugs": [
+    {"category": "crash_bug", "keywords": ["zero"]}
+  ]
+}

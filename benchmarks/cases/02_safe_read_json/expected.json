@@ -1,0 +1,8 @@
+{
+  "case_id": "02_safe_read_json",
+  "description": "JSON loader handles missing file and parse errors",
+  "source_type": "function",
+  "expected_category": "clean",
+  "expected_failure_type": null,
+  "expected_bugs": []
+}

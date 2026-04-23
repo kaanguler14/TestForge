@@ -1,0 +1,10 @@
+{
+  "case_id": "07_dict_key_crash",
+  "description": "Missing user_id raises KeyError",
+  "source_type": "function",
+  "expected_category": "crash",
+  "expected_failure_type": "source_bug",
+  "expected_bugs": [
+    {"category": "crash_bug", "keywords": ["key"]}
+  ]
+}

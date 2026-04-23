@@ -1,0 +1,8 @@
+{
+  "case_id": "05_validated_user_api",
+  "description": "POST /users with full input validation",
+  "source_type": "api",
+  "expected_category": "clean",
+  "expected_failure_type": null,
+  "expected_bugs": []
+}
