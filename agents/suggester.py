@@ -117,16 +117,26 @@ def _normalize_payload(payload: object) -> dict | None:
         return payload
 
     analysis = payload.get("analysis")
-    if not isinstance(analysis, dict):
+    container = analysis if isinstance(analysis, dict) else payload
+
+    crash_bugs = container.get("crash_bugs")
+    logic_bugs = container.get("logic_bugs")
+    if not isinstance(crash_bugs, list) and not isinstance(logic_bugs, list):
         return None
 
     findings = []
-    findings.extend(_convert_legacy_findings(analysis.get("crash_bugs"), "crash_bug"))
-    findings.extend(_convert_legacy_findings(analysis.get("logic_bugs"), "logic_bug"))
+    findings.extend(_convert_legacy_findings(crash_bugs, "crash_bug"))
+    findings.extend(_convert_legacy_findings(logic_bugs, "logic_bug"))
 
+    summary = (
+        payload.get("summary")
+        or payload.get("conclusion")
+        or container.get("summary")
+        or "Normalized legacy suggester response."
+    )
     return {
         "verdict": "BUGS_FOUND" if findings else "NO_ISSUES_FOUND",
-        "summary": payload.get("conclusion") or "Normalized legacy suggester response.",
+        "summary": summary,
         "findings": findings,
     }
 
@@ -139,12 +149,16 @@ def _convert_legacy_findings(items: object, category: str) -> list[dict]:
     for item in items:
         if not isinstance(item, dict):
             continue
+        problem = item.get("problem") or item.get("description") or "No problem description"
+        error = item.get("error")
+        if error and error not in problem:
+            problem = f"{problem} ({error})"
         findings.append(
             {
                 "category": category,
-                "input": item.get("input_example") or "unknown input",
-                "problem": item.get("description") or "No problem description",
-                "fix_hint": item.get("fix") or "No fix hint",
+                "input": item.get("input") or item.get("input_example") or "unknown input",
+                "problem": problem,
+                "fix_hint": item.get("fix_hint") or item.get("fix") or "No fix hint",
             }
         )
     return findings

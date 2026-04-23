@@ -6,11 +6,22 @@ def divide(a, b):
 Coverage: 80%
 
 Good response:
-1. divide() has no check for b=0. Input: b=0, line "return a / b" crashes with ZeroDivisionError. Fix: add if b == 0: raise ValueError("Cannot divide by zero")
+{
+  "verdict": "BUGS_FOUND",
+  "summary": "Missing divisor validation.",
+  "findings": [
+    {
+      "category": "crash_bug",
+      "input": "b=0",
+      "problem": "return a / b raises ZeroDivisionError",
+      "fix_hint": "if b == 0: raise ValueError('Cannot divide by zero')"
+    }
+  ]
+}
 
 Bad response (do NOT do this):
-- "Floating-point precision issue with division" — not a bug, Python handles this correctly
-- "No type check for inputs" — if someone passes a string, Python raises TypeError naturally. Not every TypeError needs a manual check.
+- Flag "floating-point precision" — Python float division is fine here
+- Flag "no type check for inputs" — non-numeric input already raises TypeError naturally
 
 --- EXAMPLE 2 ---
 Source Code:
@@ -29,13 +40,17 @@ FAILED test_happy_path - assert 8.792 == 8.0
 FAILED test_zero_price - Failed: DID NOT RAISE <class 'ValueError'>
 
 Good response:
-No issues found. Code is solid.
+{
+  "verdict": "NO_ISSUES_FOUND",
+  "summary": "Validation is complete. Test failures are test bugs, not source bugs.",
+  "findings": []
+}
 
 Bad response (do NOT do this):
-- "Floating-point precision issue" — Python float math is fine here, 10 * 20 / 100 = 2.0 exactly. Not a bug.
-- "Missing key in input data" — price and discount_percent are function PARAMETERS, not dict keys. They cannot be missing.
-- "Add type checking for non-numeric inputs" — the code has if-checks that will raise TypeError naturally if non-numeric. Not a crash the code should handle.
-- "The test_zero_price test failed" — that is a TEST problem, not a SOURCE CODE problem. price=0 is valid.
+- Flag "floating-point precision" — 10 * 20 / 100 = 2.0 exactly
+- Flag "missing key in input data" — price / discount_percent are parameters, not dict keys
+- Flag "add type checking" — if-checks raise TypeError naturally
+- Report the failing test_zero_price as a source bug — price=0 is valid input
 
 --- EXAMPLE 3 ---
 Source Code:
@@ -48,13 +63,23 @@ def get_user(users, user_id):
 Coverage: 90%
 
 Good response:
-1. get_user() returns None when user is not found. Callers must check for None or risk AttributeError. Consider raising a ValueError or KeyError instead.
+{
+  "verdict": "BUGS_FOUND",
+  "summary": "Missing-user lookup silently returns None.",
+  "findings": [
+    {
+      "category": "logic_bug",
+      "input": "user_id that does not exist in users",
+      "problem": "Returns None silently, so callers risk AttributeError downstream",
+      "fix_hint": "raise KeyError or ValueError when the user is not found"
+    }
+  ]
+}
 
 Bad response (do NOT do this):
-- "Rename users to user_list" — cosmetic, not a real issue
+- "Rename users to user_list" — cosmetic
 - "Add docstring" — not a code issue
-- "Python float precision may cause issues" — not relevant here, no floats involved
-- "price is a built-in keyword" — factually wrong, it is not
+- "price is a built-in keyword" — factually wrong
 
 --- EXAMPLE 4 ---
 Source Code:
@@ -65,9 +90,30 @@ def read_file(filepath):
 Coverage: 70%
 
 Good response:
-1. read_file() has no check for file existence. If filepath does not exist, FileNotFoundError will crash the caller. Add: if not os.path.exists(filepath): raise FileNotFoundError(f"File not found: {filepath}")
-2. No handling for permission errors. If the file is not readable, PermissionError will be raised. Wrap with try/except or check permissions first.
-3. No encoding parameter. Reading a non-UTF-8 file will raise UnicodeDecodeError. Add encoding="utf-8" or make it a parameter.
+{
+  "verdict": "BUGS_FOUND",
+  "summary": "File access has no defensive checks.",
+  "findings": [
+    {
+      "category": "crash_bug",
+      "input": "filepath that does not exist",
+      "problem": "open() raises FileNotFoundError and crashes the caller",
+      "fix_hint": "if not os.path.exists(filepath): raise FileNotFoundError(f'File not found: {filepath}')"
+    },
+    {
+      "category": "crash_bug",
+      "input": "filepath without read permission",
+      "problem": "open() raises PermissionError",
+      "fix_hint": "wrap with try/except PermissionError or check permissions first"
+    },
+    {
+      "category": "crash_bug",
+      "input": "non-UTF-8 file content",
+      "problem": "f.read() raises UnicodeDecodeError with default encoding",
+      "fix_hint": "pass encoding='utf-8' or expose encoding as a parameter"
+    }
+  ]
+}
 
 --- EXAMPLE 5 ---
 Source Code:
@@ -83,7 +129,11 @@ def read_json(filepath):
 Coverage: 100%
 
 Good response:
-No issues found. Code is solid.
+{
+  "verdict": "NO_ISSUES_FOUND",
+  "summary": "All failure modes are handled with explicit exceptions.",
+  "findings": []
+}
 
 --- EXAMPLE 6 ---
 Source Code:
@@ -105,8 +155,24 @@ class UserService:
 Coverage: 85%
 
 Good response:
-1. add_user() allows duplicate emails. Calling add_user("A", "a@b.com") twice creates two users with the same email. Add a duplicate check before appending.
-2. add_user() does not validate inputs. Empty string or None for name/email will be silently accepted. Add: if not name or not email: raise ValueError("name and email are required")
+{
+  "verdict": "BUGS_FOUND",
+  "summary": "add_user accepts duplicates and blank inputs.",
+  "findings": [
+    {
+      "category": "logic_bug",
+      "input": "add_user called twice with the same email",
+      "problem": "Duplicate users are appended silently, violating email uniqueness",
+      "fix_hint": "check self.users for an existing email before append"
+    },
+    {
+      "category": "logic_bug",
+      "input": "name='' or email='' or None",
+      "problem": "Empty or None values are stored without validation",
+      "fix_hint": "if not name or not email: raise ValueError('name and email are required')"
+    }
+  ]
+}
 
 --- EXAMPLE 7 ---
 Source Code:
@@ -124,8 +190,24 @@ def create_item():
 Coverage: 90%
 
 Good response:
-1. No type validation for price. Passing price="abc" will be accepted and stored as a string. Add: if not isinstance(data["price"], (int, float)): return error 400.
-2. Negative price is accepted. Add: if data["price"] < 0: return error 400.
+{
+  "verdict": "BUGS_FOUND",
+  "summary": "Price is present but not validated.",
+  "findings": [
+    {
+      "category": "logic_bug",
+      "input": "POST with price='abc'",
+      "problem": "A string price is accepted and stored without type validation",
+      "fix_hint": "if not isinstance(data['price'], (int, float)): return error 400"
+    },
+    {
+      "category": "logic_bug",
+      "input": "POST with price=-50",
+      "problem": "Negative price is accepted silently",
+      "fix_hint": "if data['price'] < 0: return error 400"
+    }
+  ]
+}
 
 --- EXAMPLE 8 ---
 Source Code:
@@ -143,12 +225,16 @@ def create_item():
 Coverage: 100%
 
 Good response:
-No issues found. Code is solid.
+{
+  "verdict": "NO_ISSUES_FOUND",
+  "summary": "All required fields and types are validated before use.",
+  "findings": []
+}
 
 Bad response (do NOT do this):
-- "Consider using a database instead of a list" — architecture suggestion, not a code bug
-- "Add logging" — not a bug or edge case
-- "The coverage is 100% but you should add more tests" — contradicts the data, tests are not your concern
+- Suggest "use a database instead of a list" — architecture, not a bug
+- Suggest "add logging" — not a bug
+- Suggest "add more tests" — contradicts the 100% coverage signal
 
 --- EXAMPLE 9 ---
 Source Code:
@@ -165,8 +251,24 @@ def send_email(to, subject, body):
 Coverage: 60%
 
 Good response:
-1. SMTP connection is not wrapped in try/finally. If sendmail() fails, server.quit() never runs, leaving the connection open. Use try/finally or a context manager.
-2. No validation for "to" parameter. An empty string or invalid email format will cause smtplib.SMTPRecipientsRefused at runtime.
+{
+  "verdict": "BUGS_FOUND",
+  "summary": "Unmanaged SMTP resource and unvalidated recipient.",
+  "findings": [
+    {
+      "category": "logic_bug",
+      "input": "sendmail raises any exception",
+      "problem": "server.quit() never runs, leaving the SMTP connection open",
+      "fix_hint": "wrap with try/finally or use a context manager for the SMTP client"
+    },
+    {
+      "category": "crash_bug",
+      "input": "to='' or a malformed email",
+      "problem": "smtplib raises SMTPRecipientsRefused at runtime",
+      "fix_hint": "validate 'to' format before calling sendmail"
+    }
+  ]
+}
 
 --- EXAMPLE 10 ---
 Source Code:
@@ -180,11 +282,22 @@ def factorial(n):
 Coverage: 100%
 
 Good response:
-1. factorial() has no recursion limit protection. Very large inputs like factorial(10000) will hit Python's recursion limit and raise RecursionError. Add a max value check or use an iterative approach.
+{
+  "verdict": "BUGS_FOUND",
+  "summary": "Recursion limit not guarded.",
+  "findings": [
+    {
+      "category": "crash_bug",
+      "input": "n=10000",
+      "problem": "Deep recursion raises RecursionError on large inputs",
+      "fix_hint": "cap n with a max guard or switch to an iterative implementation"
+    }
+  ]
+}
 
 Bad response (do NOT do this):
-- "Use math.factorial instead" — not a bug, just an alternative implementation
-- "Add type hints" — cosmetic, not a code issue
+- "Use math.factorial instead" — alternative implementation, not a bug
+- "Add type hints" — cosmetic
 
 --- EXAMPLE 11 (logic / validation bugs — silent misbehavior) ---
 Source Code:
@@ -200,16 +313,47 @@ def process_order(items, discount_percent, tax_rate):
 Coverage: 90%
 
 Good response:
-1. items=None crashes on "for item in items" with TypeError. Fix: if items is None: raise ValueError("items cannot be None")
-2. Missing 'price' or 'quantity' key crashes with KeyError on item['price']. Fix: validate each item has both keys, or raise ValueError if missing.
-3. Negative discount_percent is silently accepted and INCREASES the total (discount becomes negative). Input: discount_percent=-10, subtotal=100 → discount=-10, total=110. That is wrong. Fix: if discount_percent < 0 or discount_percent > 100: raise ValueError("discount_percent must be between 0 and 100")
-4. discount_percent > 100 produces a negative total silently. Input: discount_percent=150, subtotal=100 → discount=150, total=-50. Impossible value returned. Same fix as #3.
-5. Negative tax_rate is silently accepted and reduces the total. Input: tax_rate=-10 → tax is negative. Fix: if tax_rate < 0: raise ValueError("tax_rate cannot be negative")
+{
+  "verdict": "BUGS_FOUND",
+  "summary": "No input validation; several invalid inputs crash or silently produce impossible totals.",
+  "findings": [
+    {
+      "category": "crash_bug",
+      "input": "items=None",
+      "problem": "'for item in items' raises TypeError: 'NoneType' object is not iterable",
+      "fix_hint": "if items is None: raise ValueError('items cannot be None')"
+    },
+    {
+      "category": "crash_bug",
+      "input": "item missing 'price' or 'quantity' key",
+      "problem": "item['price'] raises KeyError",
+      "fix_hint": "validate each item has both keys, else raise ValueError"
+    },
+    {
+      "category": "logic_bug",
+      "input": "discount_percent=-10, subtotal=100",
+      "problem": "Negative discount inflates the total (discount becomes -10, total=110)",
+      "fix_hint": "if discount_percent < 0 or discount_percent > 100: raise ValueError"
+    },
+    {
+      "category": "logic_bug",
+      "input": "discount_percent=150, subtotal=100",
+      "problem": "Discount above 100 produces a negative total (-50), an impossible value",
+      "fix_hint": "same range check as above"
+    },
+    {
+      "category": "logic_bug",
+      "input": "tax_rate=-10",
+      "problem": "Negative tax reduces the total silently",
+      "fix_hint": "if tax_rate < 0: raise ValueError('tax_rate cannot be negative')"
+    }
+  ]
+}
 
 Bad response (do NOT do this):
-- "Use Decimal instead of float for money" — alternative implementation, not a bug
+- "Use Decimal instead of float for money" — alternative implementation
 - "Add logging of subtotal" — not a bug
-- "Consider moving validation to a separate function" — refactor suggestion, not a bug
+- "Move validation to a separate function" — refactor suggestion
 
 --- EXAMPLE 12 (logic bug — negative quantity accepted) ---
 Source Code:
@@ -222,8 +366,19 @@ def add_to_cart(cart, item_id, quantity):
 Coverage: 100%
 
 Good response:
-1. Negative quantity is silently accepted and reduces stored count. Input: add_to_cart({}, "x", -5) → cart becomes {"x": -5}. A cart with negative quantity is nonsensical. Fix: if quantity <= 0: raise ValueError("quantity must be positive")
+{
+  "verdict": "BUGS_FOUND",
+  "summary": "Quantity is not validated.",
+  "findings": [
+    {
+      "category": "logic_bug",
+      "input": "add_to_cart({}, 'x', -5)",
+      "problem": "Negative quantity is stored, producing a cart with a nonsensical count",
+      "fix_hint": "if quantity <= 0: raise ValueError('quantity must be positive')"
+    }
+  ]
+}
 
 Bad response (do NOT do this):
-- "Use collections.defaultdict" — alternative implementation, not a bug
-- "Return a copy of cart instead of mutating" — style preference, not a bug
+- "Use collections.defaultdict" — alternative implementation
+- "Return a copy of cart" — style preference
