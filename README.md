@@ -5,6 +5,10 @@ function and want a pytest suite for it without writing one by hand
 and without sending the source off to a paid API. Runs entirely
 against local Ollama models.
 
+# Use Case
+- Reduce QA workload in early-stage startups
+- Automatically detect logic bugs before production
+
 ## How it works
 
 ```mermaid
