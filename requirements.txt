@@ -1,5 +1,5 @@
-langgraph
-langchain-ollama
-streamlit
-pytest
-pytest-cov
+langgraph==1.1.6
+langchain-ollama==1.1.0
+streamlit==1.31.0
+pytest==9.0.3
+pytest-cov==7.1.0
