@@ -90,9 +90,23 @@ shown in parentheses.
 | `AUTOTEST_MODEL`           | `llama3.1` (fallback)      |
 | `AUTOTEST_LLM_TIMEOUT`     | `180` (seconds, per-read)  |
 | `OLLAMA_HOST`              | `http://localhost:11434`   |
+| `AUTOTEST_USE_DOCKER`      | unset (subprocess sandbox) |
+| `AUTOTEST_DOCKER_IMAGE`    | `autotest-sandbox`         |
 
 If `OLLAMA_HOST` is set without a scheme it is prefixed with `http://`
 automatically.
+
+### Sandboxing
+
+By default the runner shells out to `pytest` directly on the host.
+That is fast but assumes the code under test is your own — it has the
+same access to the filesystem and the network as the user running
+Streamlit. Set `AUTOTEST_USE_DOCKER=1` and the runner will instead run
+each pytest invocation in an ephemeral container built from
+`Dockerfile.sandbox`, with no network (`--network none`) and a
+512 MB / 2 CPU cap. Only `sandbox/` is bind-mounted in, so the rest of
+the host filesystem is not visible. The image is built on the first
+run if it is not already present (about a minute) and then reused.
 
 ### A note on VRAM
 
@@ -128,13 +142,14 @@ runs/                   per-run artifact dumps
 
 ## Known limitations
 
-The runner still uses a subprocess; it should move to a Docker sandbox
-before this is exposed to code that is not your own. Suggester output
-occasionally arrives as prose rather than JSON, and the fallback
-parser papers over more than it should. The writer sometimes skips
-edge-case tests when the source code does not visibly handle them, so
-genuine crash bugs can slip past in a single iteration. None of these
-are fixed yet — they are next on the list.
+The default subprocess runner is fine for your own code but does not
+isolate untrusted input — set `AUTOTEST_USE_DOCKER=1` for that. The
+suggester sometimes emits prose instead of JSON and the fallback
+parser papers over more than it should, which inflates false
+positives on clean code. The writer occasionally skips edge-case
+tests when the source does not visibly handle them, so a single
+iteration can miss a genuine crash bug. Both of these are next on the
+list.
 
 ## License
 
