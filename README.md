@@ -1,1 +1,141 @@
 # TestForge
+
+Aimed at the part of the day where you have just finished a Python
+function and want a pytest suite for it without writing one by hand
+and without sending the source off to a paid API. Runs entirely
+against local Ollama models.
+
+## Status
+
+Work in progress. Function mode is the stable manual-testing path; API
+mode is present but less battle-tested. See `CLAUDE.md` for the
+running roadmap and the list of known issues.
+
+## How it works
+
+```mermaid
+flowchart LR
+    Source[Source code] --> Writer
+    Writer --> Runner
+    Runner --> Analyzer
+    Analyzer -- test_error --> Writer
+    Analyzer -- pass or source_bug --> Suggester
+    Suggester --> UI
+```
+
+Each box is a LangGraph node.
+
+The **writer** generates pytest tests for the user's code. The first
+iteration sees only the source; later iterations also receive the
+previous pytest output and the analyzer's diagnosis, so the model can
+correct itself instead of re-emitting the same broken test.
+
+The **runner** writes the source to `sandbox/source_code.py`, runs
+pytest with `--cov`, and parses the output. Tests with no assertions
+are rejected before pytest is ever spawned, and the source is compiled
+once before the subprocess starts so syntax errors fail fast.
+
+The **analyzer** classifies failures as `TEST_ERROR` (bad test) or
+`SOURCE_BUG` (the user's code violates its spec). When the verdict is
+`SOURCE_BUG` the loop stops — retrying will not fix code that is the
+problem. Otherwise the analyzer's notes go back to the writer for
+another attempt, up to three iterations.
+
+The **suggester** runs once at the end and produces a structured list
+of crash and logic bugs with concrete fix hints. Few-shot examples are
+injected into the prompt to keep the output JSON-shaped.
+
+## Installation
+
+Install Ollama and pull the three models used by default:
+
+```
+ollama pull qwen2.5-coder:7b
+ollama pull qwen3:8b
+ollama pull llama3.1
+```
+
+Then create a Python environment and install the requirements:
+
+```
+conda create -n autotest python=3.11
+conda activate autotest
+pip install -r requirements.txt
+```
+
+## Usage
+
+Start the Streamlit UI:
+
+```
+streamlit run app.py
+```
+
+Pick a source type (function or API) in the sidebar, paste your code,
+and click *Run*. The sidebar also exposes the iteration cap and the
+coverage threshold. Each run writes its full transcript — generated
+tests, pytest output, analyzer notes, suggestions, history — to
+`runs/<run_id>_<source_type>/`.
+
+## Configuration
+
+The agents read their model name from the environment. Defaults are
+shown in parentheses.
+
+| Variable                   | Default                    |
+| -------------------------- | -------------------------- |
+| `AUTOTEST_WRITER_MODEL`    | `qwen2.5-coder:7b`         |
+| `AUTOTEST_ANALYZER_MODEL`  | `qwen3:8b`                 |
+| `AUTOTEST_SUGGESTER_MODEL` | `qwen3:8b`                 |
+| `AUTOTEST_MODEL`           | `llama3.1` (fallback)      |
+| `AUTOTEST_LLM_TIMEOUT`     | `180` (seconds, per-read)  |
+| `OLLAMA_HOST`              | `http://localhost:11434`   |
+
+If `OLLAMA_HOST` is set without a scheme it is prefixed with `http://`
+automatically.
+
+### A note on VRAM
+
+The default writer (`qwen2.5-coder:7b`, around 4.7 GB) and the default
+analyzer/suggester (`qwen3:8b`, around 5.6 GB) do not fit together in
+6 GB of VRAM. To avoid Ollama's eviction-and-partial-offload cycle the
+loader explicitly evicts the previous model whenever a different model
+is requested next. Same-model calls — for example analyzer to
+suggester — are left alone and stay resident, so the only reload cost
+paid is the one that is actually needed.
+
+## Project layout
+
+```
+app.py                  Streamlit UI
+graph.py                LangGraph wiring of the four agents
+agents/
+    __init__.py         model defaults and the LLM cache
+    context.py          TestContext — the per-run state object
+    writer.py           pytest test generator
+    runner.py           sandbox + pytest runner
+    analyzer.py         failure / coverage analysis
+    suggester.py        bug list + fix suggestions
+    prompts/            few-shot examples for the suggester
+benchmarks/
+    cases/              fifteen labelled cases (clean / crash / logic)
+    results/            per-run reports
+scripts/
+    run_benchmark.py    CLI runner for the benchmark suite
+sandbox/                where the runner places code under test
+runs/                   per-run artifact dumps
+```
+
+## Known limitations
+
+The runner still uses a subprocess; it should move to a Docker sandbox
+before this is exposed to code that is not your own. Suggester output
+occasionally arrives as prose rather than JSON, and the fallback
+parser papers over more than it should. The writer sometimes skips
+edge-case tests when the source code does not visibly handle them, so
+genuine crash bugs can slip past in a single iteration. None of these
+are fixed yet — they are next on the list.
+
+## License
+
+TBD.
