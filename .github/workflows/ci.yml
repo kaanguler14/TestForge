@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Import all agent modules
+        run: |
+          python -c "
+          import agents
+          import agents.context
+          import agents.writer
+          import agents.runner
+          import agents.analyzer
+          import agents.suggester
+          import graph
+          print('imports ok')
+          "
+
+      - name: Build sandbox image
+        run: docker build -f Dockerfile.sandbox -t autotest-sandbox .
+
+      - name: Verify sandbox image contents
+        run: |
+          docker run --rm autotest-sandbox python -c "import pytest, pytest_cov; print('sandbox image ok')"
