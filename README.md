@@ -1,4 +1,4 @@
-# TestForge
+# Test Forge
 
 Aimed at the part of the day where you have just finished a Python
 function and want a pytest suite for it without writing one by hand
